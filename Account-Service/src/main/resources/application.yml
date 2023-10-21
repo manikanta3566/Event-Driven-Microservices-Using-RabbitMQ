@@ -1,0 +1,39 @@
+server:
+  port: 9091
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/spring_boot_practice
+    username: root
+    password: 123456789
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  application:
+    name: account-service
+  cloud:
+    function:
+      definition: updateNotification
+    stream:
+      bindings:
+        messageExchange-out-0:
+          destination: send-notification
+        updateNotification-in-0:
+          destination: notification-sent
+          group: ${spring.application.name}
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    connection-timeout: 10s
+
+
+  #jpa configurations
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format-sql: true
+    hibernate:
+      ddl-auto: update
+      dialect: org.hibernate.dialect.MySQL8Dialect
+

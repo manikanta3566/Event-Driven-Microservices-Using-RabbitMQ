@@ -1,0 +1,25 @@
+
+server:
+  port: 9092
+
+spring:
+  application:
+    name: message-service
+  cloud:
+    function:
+      definition: email
+    stream:
+      bindings:
+        email-in-0:
+          destination: send-notification
+          group: ${spring.application.name}
+        email-out-0:
+          destination: notification-sent
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    connection-timeout: 10s
+
+

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: event-driven-configmap
+data:
+  MYSQL_DATABASE: spring_boot_practice
+  MYSQL_ROOT_PASSWORD: "123456789"
+  ACCOUNT_APPLICATION_NAME: account-service
+  MESSAGE_APPLICATION_NAME: message-service
+  SPRING_PROFILES_ACTIVE: dev
+  SPRING_DATASOURCE_USERNAME: root
+  SPRING_DATASOURCE_PASSWORD: "123456789"
+  SPRING_DATASOURCE_URL: jdbc:mysql://mysql-service:3306/spring_boot_practice
+  SPRING_RABBITMQ_HOST: rabbit
+  ACCOUNT_SERVER_PORT: "9091"
+  MESSAGE_SERVER_PORT: "9092"
+  SPRING_JPA_HIBERNATE_DIALECT: org.hibernate.dialect.MySQL8Dialect

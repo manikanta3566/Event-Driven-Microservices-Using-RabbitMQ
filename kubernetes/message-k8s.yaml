@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: messaging-deployment
+  labels:
+    app: messagingserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: messagingserver
+  template:
+    metadata:
+      labels:
+        app: messagingserver
+    spec:
+      containers:
+        - name: messagingserver
+          image: manikanta44/messaging-service:latest
+          ports:
+            - containerPort: 9092
+          env:
+            - name: SPRING_APPLICATION_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: event-driven-configmap
+                  key: MESSAGE_APPLICATION_NAME
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: event-driven-configmap
+                  key: SPRING_PROFILES_ACTIVE
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: event-driven-configmap
+                  key: SPRING_DATASOURCE_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: event-driven-configmap
+                  key: SPRING_DATASOURCE_PASSWORD
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: event-driven-configmap
+                  key: SPRING_DATASOURCE_URL
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: event-driven-configmap
+                  key: MESSAGE_SERVER_PORT
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: messagingserver-service
+spec:
+  selector:
+    app: messagingserver
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 9092
+      targetPort: 9092

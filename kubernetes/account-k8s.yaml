@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: account-deployment
+  labels:
+    app: accountserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: accountserver
+  template:
+    metadata:
+      labels:
+        app: accountserver
+    spec:
+      containers:
+        - name: accountserver
+          image: manikanta44/account-service:latest
+          ports:
+            - containerPort: 9091
+          env:
+            - name: SPRING_APPLICATION_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: event-driven-configmap
+                  key: ACCOUNT_APPLICATION_NAME
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: event-driven-configmap
+                  key: SPRING_PROFILES_ACTIVE
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: event-driven-configmap
+                  key: SPRING_DATASOURCE_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: event-driven-configmap
+                  key: SPRING_DATASOURCE_PASSWORD
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: event-driven-configmap
+                  key: SPRING_DATASOURCE_URL
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: event-driven-configmap
+                  key: ACCOUNT_SERVER_PORT
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: accountserver-service
+spec:
+  selector:
+    app: accountserver
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 9091
+      targetPort: 9091

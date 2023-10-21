@@ -1,0 +1,89 @@
+version: "3.8"
+
+services:
+
+  mysql-db:
+    image: mysql:latest
+    ports:
+      - '3306:3306'
+    healthcheck:
+      test: ["CMD","mysqladmin","ping","-h","localhost"]
+      timeout: 10s
+      interval: 10s
+      retries: 10
+      start_period: 10s
+    environment:
+      - MYSQL_DATABASE=spring_boot_practice
+      - MYSQL_ROOT_PASSWORD=123456789
+    extends:
+      service: network-service
+      file: common-config.yml
+
+
+  rabbit:
+    image: rabbitmq:3.12-management
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      timeout: 10s
+      interval: 10s
+      retries: 10
+      start_period: 10s
+    extends:
+      service: network-service
+      file: common-config.yml
+
+  account-service:
+    image: manikanta44/account-service:latest
+    mem_limit: 700m
+    ports:
+      - "9091:9091"
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      rabbit:
+        condition: service_healthy
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 120s
+    environment:
+      SPRING_APPLICATION_NAME: account-service
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 123456789
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/spring_boot_practice
+      SPRING_RABBITMQ_HOST: rabbit
+      SERVER_PORT: 9091
+    extends:
+      service: network-service
+      file: common-config.yml
+
+  messaging-service:
+    image: manikanta44/messaging-service:latest
+    mem_limit: 700m
+    ports:
+      - "9092:9092"
+    depends_on:
+      rabbit:
+        condition: service_healthy
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 120s
+    environment:
+      SPRING_APPLICATION_NAME: message-service
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_RABBITMQ_HOST: rabbit
+    extends:
+      service: network-service
+      file: common-config.yml
+
+networks:
+  event-driven-network:
